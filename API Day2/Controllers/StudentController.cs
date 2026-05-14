@@ -27,7 +27,7 @@ namespace API_Day2.Controllers
             .Include(s => s.Dept)
             .Include(s => s.St_superNavigation)
             .ToList();
-            return Ok(mapper.Map<List<GetAllWithNames>>(iTIContext.Students.ToList()));
+            return Ok(mapper.Map<List<GetAllWithNames>>(students));
         }
 
         [HttpGet("{id:int}")]
@@ -39,11 +39,15 @@ namespace API_Day2.Controllers
         [HttpPost]
         public IActionResult AddStudent(AddStudent studentDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+
             Student? newStudent = mapper.Map<Student>(studentDto);
 
             iTIContext.Students.Add(newStudent);
             iTIContext.SaveChanges();
-            return Ok();
+            return Created();
         }
 
         [HttpPut]
@@ -52,21 +56,19 @@ namespace API_Day2.Controllers
             if (studentDto == null)
                 return BadRequest();
 
-            Student? st = iTIContext.Students.Where(s => s.St_Fname == studentDto.St_Fname).FirstOrDefault();
+            Student? st = iTIContext.Students.Find(studentDto.St_Id);
             if (st == null)
                 return NotFound();
 
-            st = mapper.Map<Student>(studentDto);
+            mapper.Map(studentDto, st);
 
-            iTIContext.Students.Update(st);
             iTIContext.SaveChanges();
-            return Ok(st);
+            return NoContent();
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         public IActionResult DeleteStudent(int id)
         {
-
             Student? student = iTIContext.Students.Find(id);
 
             if (student == null)

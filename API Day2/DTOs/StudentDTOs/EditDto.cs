@@ -2,6 +2,8 @@
 {
     public class EditDto
     {
+        public int St_Id { get; set; }
+
         public string St_Fname { get; set; }
 
         public string St_Lname { get; set; }
