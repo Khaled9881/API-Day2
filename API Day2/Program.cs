@@ -2,6 +2,8 @@
 using API_Day2.MapConfig;
 using API_Day2.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Drawing;
 
 namespace API_Day2
 {
@@ -21,6 +23,21 @@ namespace API_Day2
             builder.Services.AddAutoMapper(op => op.AddProfile<StudentGetAllConfig>());
             builder.Services.AddAutoMapper(op => op.AddProfile<AddStudentConfig>());
             builder.Services.AddAutoMapper(op => op.AddProfile<EditStudentConfig>());
+            builder.Services.AddAutoMapper(op => op.AddProfile<GetAllDepartmentsConfig>());
+            builder.Services.AddAutoMapper(op => op.AddProfile<AddDepartmentConfig>());
+            builder.Services.AddAutoMapper(op => op.AddProfile<EditDeparmentConfig>());
+
+            builder.Services.AddCors(opt =>
+            {
+                opt.AddPolicy("FrontPolicy", policy =>
+                {
+                    policy.WithOrigins("http://127.0.0.1:5500")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
+            });
+
+            //builder.Services.AddAutoMapper(typeof(Program));
 
 
             var app = builder.Build();
@@ -35,6 +52,7 @@ namespace API_Day2
 
             app.UseHttpsRedirection();
 
+            app.UseCors("FrontPolicy");
             app.UseAuthorization();
 
 
