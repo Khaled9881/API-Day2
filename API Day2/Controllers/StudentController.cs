@@ -20,18 +20,35 @@ namespace API_Day2.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet]
-        public IActionResult Student()
+        [HttpGet("page/{pageNumber:int}")]
+        public IActionResult GetAllStudent(int pageNumber = 1)
         {
             var students = iTIContext.Students
             .Include(s => s.Dept)
-            .Include(s => s.St_superNavigation)
-            .ToList();
-            return Ok(mapper.Map<List<GetAllWithNames>>(students));
+            .Include(s => s.St_superNavigation);
+            //.ToList();
+
+            decimal count = students.Count();
+            int StudentsPerPage = 2;
+            int pages = (int)Math.Ceiling(count / StudentsPerPage);
+
+
+            if (pageNumber > pages || pageNumber <= 0)
+                return NotFound();
+
+            var page = students
+                .Skip((pageNumber - 1) * StudentsPerPage)
+                .Take(StudentsPerPage)
+                .ToList();
+
+            var res = mapper.Map<List<GetAllWithNames>>(page);
+            return Ok(res);
+
+            //return Ok(mapper.Map<List<GetAllWithNames>>(students));
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult Student(int id)
+        public IActionResult GetStudentById(int id)
         {
             return Ok(iTIContext.Students.Find(id));
         }
@@ -48,6 +65,17 @@ namespace API_Day2.Controllers
             iTIContext.Students.Add(newStudent);
             iTIContext.SaveChanges();
             return Created();
+        }
+
+        [HttpGet("search/{name}")]
+        public IActionResult SearchByName(string name)
+        {
+            List<Student>? students = iTIContext.Students.Where(s => s.St_Fname.ToLower() == name.ToLower()).ToList();
+
+            if (students == null)
+                return NotFound();
+
+            return Ok(mapper.Map<List<GetAllWithNames>>(students));
         }
 
         [HttpPut]
